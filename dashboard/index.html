@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Launch Radar — every pre-token protocol, ranked and accounted for</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="mast">
+  <div class="mast-in">
+    <div>
+      <h1>Token Launch Radar</h1>
+      <p class="sub">Every protocol that records no token yet, ranked by what its launch would be worth — and every other protocol accounted for. Snapshot <span id="asof"></span>, DefiLlama via make.fun. Implied values are this radar's own claim, worked out from the snapshot's figures by the model under Method; nothing here predicts whether or when a token is issued.</p>
+    </div>
+  </div>
+  <div class="kpis" id="kpis"></div>
+  <nav class="tabs" id="tabs">
+    <button data-view="board" class="on">Board</button>
+    <button data-view="method">Method</button>
+    <button data-view="trading">Already trading</button>
+    <button data-view="accounted">Accounted: all 758</button>
+  </nav>
+</header>
+
+<main>
+  <section id="view-board">
+    <div class="controls">
+      <input id="q" type="search" placeholder="Search name or slug">
+      <select id="cat"></select>
+      <select id="screen">
+        <option value="all">House screen: all rows</option>
+        <option value="pass">House screen: passes</option>
+        <option value="fail">House screen: flagged</option>
+      </select>
+      <label class="chk"><input type="checkbox" id="watchonly"> Watchlist only (40)</label>
+      <span class="count" id="count"></span>
+    </div>
+    <div class="tablewrap">
+      <table id="board">
+        <thead><tr>
+          <th data-k="rank">#</th><th data-k="name">Protocol</th><th data-k="cat">Category</th>
+          <th data-k="tvl" class="num">TVL</th><th data-k="chg" class="num">7d %</th>
+          <th data-k="age" class="num">Age</th><th data-k="implied" class="num">Implied value</th>
+          <th data-k="odds" class="num">Peer odds</th><th>Screen</th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p class="note">Peer odds: of the same-category protocols tracked at least as long, the share that already record a token, shrunk toward the snapshot's global rate. Screen: the house's product screen from the field guide, shown as a flag with its reason — flagged rows stay on the board; nothing is silently dropped. Click a row for its detail: the model's arithmetic, its band, and its farm plan with totals and a verdict.</p>
+  </section>
+
+  <section id="view-detail" hidden>
+    <button class="back" id="back">← Back to the board</button>
+    <div id="detail"></div>
+  </section>
+
+  <section id="view-method" hidden>
+    <h2>How the values are worked out</h2>
+    <p>The model is not picked by hand. Fourteen families are fitted on the <b id="m-priced"></b> protocols whose token already trades at a recorded market cap, and each is scored held-out twice: five-fold cross-validation (folds by an FNV-1a hash of the slug; the score is the median multiplicative error, so ×3 means half the held-out predictions land within a factor of three) and a walk-forward split (the earliest-tracked 70% trains, the latest 30% tests). The cross-validation winner, refitted on all the priced protocols, prices the board. Its cross-validation signed errors' middle half is the band on every row: honest width, not decoration.</p>
+    <div class="tablewrap"><table id="methodtab">
+      <thead><tr><th>Family</th><th class="num">Cross-validation ×</th><th class="num">Walk-forward ×</th><th></th></tr></thead>
+      <tbody id="methodrows"></tbody>
+    </table></div>
+    <p>Two things the table shows plainly. Feature tilts do not survive contact with held-out data: the age tilt and the full linear model test worse than the plain power law, and the walk-forward column catches the bucket model coasting on recent listings. What survives is an ensemble: the median of a power law, a winsorized-ratio power law and a TVL-bucket ratio. Every row's detail view shows that arithmetic — the three component values and their median — beside the band.</p>
+    <p>Implied value = 10 raised to the winner's predicted log<sub>10</sub> market cap, from the protocol's own TVL (and, in the families that use them, its seven-day growth, its age and its chain spread). No protocol's name is an input anywhere.</p>
+  </section>
+
+  <section id="view-trading" hidden>
+    <h2>Already trading — set aside, not ranked</h2>
+    <p id="trading-note"></p>
+    <div class="tablewrap"><table id="tradingtab">
+      <thead><tr><th>#</th><th>Protocol</th><th>Category</th><th class="num">TVL</th><th class="num">Market cap</th><th class="num">7d %</th></tr></thead>
+      <tbody id="tradingrows"></tbody>
+    </table></div>
+  </section>
+
+  <section id="view-accounted" hidden>
+    <h2>All 758 protocols, accounted for</h2>
+    <p id="accounted-note"></p>
+    <div class="tablewrap"><table id="accountedtab">
+      <thead><tr><th>Category</th><th class="num">Ranked (records no token)</th><th class="num">Set aside (records a token)</th><th class="num">Total</th></tr></thead>
+      <tbody id="accountedrows"></tbody>
+    </table></div>
+  </section>
+</main>
+
+<footer>Built from the sealed snapshot alone: no network, no hand-kept list of names. A protocol “records no token” on DefiLlama's record; that is not proof it has none.</footer>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
